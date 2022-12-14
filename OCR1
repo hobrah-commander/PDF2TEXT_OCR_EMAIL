@@ -1,0 +1,34 @@
+from PIL import Image
+import pytesseract
+from openai import GPT3
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+
+# Set up GPT-3
+gpt3 = GPT3(engine="text-davinci-002",
+            api_key="YOUR_GPT3_API_KEY")
+
+# Server-side function that accepts an image file as input
+def ocr_and_generate_pdf(image_file):
+    # Load the image file
+    image = Image.open(image_file)
+    
+    # Run OCR on the image to extract the text
+    text = pytesseract.image_to_string(image)
+    
+    # Pass the extracted text to the GPT-3 language generation model
+    response = gpt3.generate(prompt=text, max_tokens=1024)
+    generated_text = response["choices"][0]["text"]
+    
+    # Create a canvas and set the font and font size
+    c = canvas.Canvas("generated_text.pdf")
+    c.setFont("Helvetica", 12)
+
+    # Write the generated text to the PDF
+    c.drawString(1*inch, 10*inch, generated_text)
+
+    # Save the PDF
+    c.save()
+    
+    # Return the generated PDF to the client
+    return pdf
